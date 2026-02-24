@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build
+.next
+out
+build
+dist
+
+# Env and secrets
+.env
+.env.local
+.env.*.local
+.admin-credentials.txt
+
+# Debug and IDE
+*.log
+npm-debug.log*
+.DS_Store
+.idea
+.vscode

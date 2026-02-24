@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    @apply font-body text-slate-800 antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: #f8fafc;
+    background-image: theme("backgroundImage.parchment");
+  }
+
+  a {
+    @apply text-inherit no-underline outline-none transition-colors;
+  }
+
+  a:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-slate-900;
+  }
+}
+
+@layer components {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
