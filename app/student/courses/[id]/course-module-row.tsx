@@ -29,7 +29,7 @@ const rowContent = (mod: CourseModuleForStudent, index: number, isLocked: boolea
       </span>
     )}
     {isLocked ? (
-      <Lock className="h-4 w-4 shrink-0 text-slate-400" title="Complete the previous topic first" />
+      <Lock className="h-4 w-4 shrink-0 text-slate-400" aria-label="Complete the previous topic first" />
     ) : (
       <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
     )}
