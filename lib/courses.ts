@@ -73,6 +73,32 @@ export async function getEnrolledCourses(userId: string): Promise<(CourseForCard
   });
 }
 
+/** Enrolled courses with their modules (for message topic dropdown). */
+export async function getEnrolledCoursesWithModules(
+  userId: string
+): Promise<{ id: string; title: string; modules: { id: string; title: string }[] }[]> {
+  const enrolled = await getEnrolledCourses(userId);
+  if (!enrolled.length) return [];
+  const supabase = createSupabaseServerClient();
+  const courseIds = enrolled.map((c) => c.id);
+  const { data: modules } = await supabase
+    .from("modules")
+    .select("id, course_id, title, index_in_course")
+    .in("course_id", courseIds)
+    .order("index_in_course", { ascending: true });
+  const modulesByCourse = new Map<string, { id: string; title: string }[]>();
+  for (const m of modules ?? []) {
+    const list = modulesByCourse.get(m.course_id) ?? [];
+    list.push({ id: m.id, title: m.title });
+    modulesByCourse.set(m.course_id, list);
+  }
+  return enrolled.map((c) => ({
+    id: c.id,
+    title: c.title,
+    modules: modulesByCourse.get(c.id) ?? [],
+  }));
+}
+
 /** Whether the user can enroll in a new course. Students must complete their current course before enrolling in another. Staff (admin/facilitator) can always enroll. */
 export async function canEnrollInNewCourse(
   userId: string

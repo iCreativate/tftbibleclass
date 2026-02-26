@@ -1,25 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { respondToNote, type NoteForAdmin } from "./actions";
+import {
+  respondToNote,
+  addFacilitatorReply,
+  type NoteForAdminWithMessages,
+} from "./actions";
 import { Button } from "@/components/ui/button";
 
-export function AdminMessagesClient({ initialNotes }: { initialNotes: NoteForAdmin[] }) {
+export function AdminMessagesClient({
+  initialNotes,
+}: {
+  initialNotes: NoteForAdminWithMessages[];
+}) {
   const router = useRouter();
   const [notes, setNotes] = useState(initialNotes);
-  useEffect(() => {
-    setNotes(initialNotes);
-  }, [initialNotes]);
   const [respondingId, setRespondingId] = useState<string | null>(null);
   const [responseText, setResponseText] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function handleRespond(noteId: string) {
-    if (!responseText.trim() || saving) return;
+  async function handleSendReply(noteId: string) {
+    const trimmed = responseText.trim();
+    if (!trimmed || saving) return;
     setSaving(true);
     try {
-      const { error } = await respondToNote(noteId, responseText);
+      const note = notes.find((n) => n.id === noteId);
+      const isFirstResponse = !note?.admin_response;
+      const { error } = isFirstResponse
+        ? await respondToNote(noteId, trimmed)
+        : await addFacilitatorReply(noteId, trimmed);
       if (!error) {
         setRespondingId(null);
         setResponseText("");
@@ -45,27 +55,35 @@ export function AdminMessagesClient({ initialNotes }: { initialNotes: NoteForAdm
           key={note.id}
           className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
         >
-          <div className="flex flex-col gap-2 text-sm">
-            <p className="font-medium text-slate-900">{note.content}</p>
-            <p className="text-xs text-slate-500">
-              {note.user_name ?? "Student"} · {note.course_title ?? "General"}
-              {note.module_title ? ` · ${note.module_title}` : ""} ·{" "}
-              {new Date(note.created_at).toLocaleString()}
-            </p>
-            {note.admin_response && (
-              <div className="mt-2 rounded-lg bg-slate-50 p-3 text-slate-700">
-                <p className="text-xs font-semibold text-slate-500">Your response</p>
-                <p className="mt-1">{note.admin_response}</p>
-                {note.responded_at && (
-                  <p className="mt-1 text-xs text-slate-500">
-                    {new Date(note.responded_at).toLocaleString()}
-                  </p>
-                )}
+          <div className="mb-2 text-xs text-slate-500">
+            {note.user_name ?? "Student"} · {note.course_title ?? "General"}
+            {note.module_title ? ` · ${note.module_title}` : ""} ·{" "}
+            {new Date(note.created_at).toLocaleString()}
+          </div>
+          <div className="space-y-3">
+            {note.messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`rounded-lg px-3 py-2 text-sm ${
+                  msg.role === "facilitator"
+                    ? "bg-primary/10 text-slate-800"
+                    : "bg-slate-50 text-slate-700"
+                }`}
+              >
+                <span className="text-xs font-semibold text-slate-500">
+                  {msg.role === "student" ? "Student" : "You"}
+                </span>
+                <p className="mt-0.5">{msg.body}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {new Date(msg.created_at).toLocaleString()}
+                </p>
               </div>
-            )}
+            ))}
             {respondingId === note.id ? (
-              <div className="mt-3 space-y-2">
+              <div className="space-y-2">
                 <textarea
+                  id={`facilitator-reply-${note.id}`}
+                  name="facilitatorReply"
                   className="min-h-[80px] w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                   placeholder="Type your response..."
                   value={responseText}
@@ -75,10 +93,10 @@ export function AdminMessagesClient({ initialNotes }: { initialNotes: NoteForAdm
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    onClick={() => handleRespond(note.id)}
+                    onClick={() => handleSendReply(note.id)}
                     disabled={saving || !responseText.trim()}
                   >
-                    {saving ? "Sending..." : "Send response"}
+                    {saving ? "Sending..." : "Send"}
                   </Button>
                   <Button
                     size="sm"
@@ -93,16 +111,16 @@ export function AdminMessagesClient({ initialNotes }: { initialNotes: NoteForAdm
                   </Button>
                 </div>
               </div>
-            ) : !note.admin_response ? (
+            ) : (
               <Button
                 size="sm"
                 variant="outline"
-                className="mt-2 w-fit"
+                className="w-fit"
                 onClick={() => setRespondingId(note.id)}
               >
-                Respond
+                {note.admin_response ? "Reply again" : "Respond"}
               </Button>
-            ) : null}
+            )}
           </div>
         </div>
       ))}

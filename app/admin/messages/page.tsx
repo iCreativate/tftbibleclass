@@ -1,10 +1,10 @@
 import { requireRole } from "@/lib/auth/server";
-import { getNotesForAdmin } from "./actions";
+import { getNotesForAdminWithMessages } from "./actions";
 import { AdminMessagesClient } from "./admin-messages-client";
 
 export default async function AdminMessagesPage() {
-  await requireRole("admin");
-  const notes = await getNotesForAdmin();
+  await requireRole(["admin", "facilitator"]);
+  const notes = await getNotesForAdminWithMessages();
 
   return (
     <div className="space-y-6">

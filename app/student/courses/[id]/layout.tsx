@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth/server";
 import {
   getCourseForStudent,
   getCourseProgressPercent,
+  getEnrolledCoursesWithModules,
 } from "@/lib/courses";
 import { StudentCourseSidebar } from "@/components/student-course-sidebar";
 
@@ -14,7 +15,10 @@ type Props = {
 export default async function StudentCourseLayout({ params, children }: Props) {
   const user = await requireRole(["student", "facilitator", "admin"]);
   const { id: courseId } = await params;
-  const course = await getCourseForStudent(courseId, user.id);
+  const [course, coursesWithModules] = await Promise.all([
+    getCourseForStudent(courseId, user.id),
+    getEnrolledCoursesWithModules(user.id),
+  ]);
 
   if (!course) {
     notFound();
@@ -33,6 +37,7 @@ export default async function StudentCourseLayout({ params, children }: Props) {
         estimatedMinutes={course.estimated_minutes ?? 60}
         progressPercent={progressPercent}
         courseId={courseId}
+        coursesWithModules={coursesWithModules}
       />
     </div>
   );

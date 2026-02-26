@@ -3,6 +3,13 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
 
+export type ThreadMessage = {
+  id: string;
+  role: "student" | "facilitator";
+  body: string;
+  created_at: string;
+};
+
 export type NoteForAdmin = {
   id: string;
   user_id: string;
@@ -17,8 +24,12 @@ export type NoteForAdmin = {
   module_title: string | null;
 };
 
+export type NoteForAdminWithMessages = NoteForAdmin & {
+  messages: ThreadMessage[];
+};
+
 export async function getNotesForAdmin(): Promise<NoteForAdmin[]> {
-  await requireRole("admin");
+  await requireRole(["admin", "facilitator"]);
   const supabase = createSupabaseServerClient();
   const { data: notes } = await supabase
     .from("notes")
@@ -44,8 +55,50 @@ export async function getNotesForAdmin(): Promise<NoteForAdmin[]> {
   })) as NoteForAdmin[];
 }
 
+/** Get notes with full message threads for admin/facilitator. */
+export async function getNotesForAdminWithMessages(): Promise<NoteForAdminWithMessages[]> {
+  const notes = await getNotesForAdmin();
+  if (notes.length === 0) return [];
+  const supabase = createSupabaseServerClient();
+  const { data: replies } = await supabase
+    .from("note_messages")
+    .select("id, note_id, role, body, created_at")
+    .in("note_id", notes.map((n) => n.id))
+    .order("created_at", { ascending: true });
+  const repliesByNote = new Map<string, NonNullable<typeof replies>>();
+  for (const r of replies ?? []) {
+    const list = repliesByNote.get(r.note_id) ?? [];
+    list.push(r);
+    repliesByNote.set(r.note_id, list);
+  }
+  return notes.map((note) => {
+    const thread: ThreadMessage[] = [
+      { id: `${note.id}-q`, role: "student", body: note.content, created_at: note.created_at },
+    ];
+    if (note.admin_response && note.responded_at) {
+      thread.push({
+        id: `${note.id}-a`,
+        role: "facilitator",
+        body: note.admin_response,
+        created_at: note.responded_at,
+      });
+    }
+    const extra = repliesByNote.get(note.id) ?? [];
+    for (const e of extra) {
+      thread.push({
+        id: e.id,
+        role: e.role as "student" | "facilitator",
+        body: e.body,
+        created_at: e.created_at,
+      });
+    }
+    return { ...note, messages: thread };
+  });
+}
+
+/** First response on a note (sets admin_response on notes table). */
 export async function respondToNote(noteId: string, adminResponse: string): Promise<{ error?: string }> {
-  const user = await requireRole("admin");
+  const user = await requireRole(["admin", "facilitator"]);
   const trimmed = adminResponse.trim();
   if (!trimmed) return { error: "Response is required." };
   const supabase = createSupabaseServerClient();
@@ -58,6 +111,22 @@ export async function respondToNote(noteId: string, adminResponse: string): Prom
       updated_at: new Date().toISOString(),
     })
     .eq("id", noteId);
+  if (error) return { error: error.message };
+  return {};
+}
+
+/** Add another facilitator reply to a note thread. */
+export async function addFacilitatorReply(noteId: string, body: string): Promise<{ error?: string }> {
+  const user = await requireRole(["admin", "facilitator"]);
+  const trimmed = body.trim();
+  if (!trimmed) return { error: "Message is required." };
+  const supabase = createSupabaseServerClient();
+  const { error } = await supabase.from("note_messages").insert({
+    note_id: noteId,
+    author_id: user.id,
+    role: "facilitator",
+    body: trimmed,
+  });
   if (error) return { error: error.message };
   return {};
 }

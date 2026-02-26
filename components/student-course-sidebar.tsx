@@ -2,7 +2,7 @@
 
 import { ProgressBar } from "@/components/progress-bar";
 import { BibleReader } from "@/components/bible-reader";
-import { ModuleChat } from "@/components/module-chat";
+import { ModuleChat, type CourseWithModules } from "@/components/module-chat";
 
 type Props = {
   title: string;
@@ -10,6 +10,7 @@ type Props = {
   estimatedMinutes: number;
   progressPercent: number;
   courseId?: string;
+  coursesWithModules?: CourseWithModules[];
 };
 
 export function StudentCourseSidebar({
@@ -18,6 +19,7 @@ export function StudentCourseSidebar({
   estimatedMinutes,
   progressPercent,
   courseId,
+  coursesWithModules = [],
 }: Props) {
   return (
     <div className="sticky top-24 space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -37,7 +39,11 @@ export function StudentCourseSidebar({
         </div>
       </div>
       <BibleReader />
-      <ModuleChat courseTitle={title} courseId={courseId ?? undefined} />
+      <ModuleChat
+        courseTitle={title}
+        courseId={courseId ?? undefined}
+        coursesWithModules={coursesWithModules}
+      />
     </div>
   );
 }

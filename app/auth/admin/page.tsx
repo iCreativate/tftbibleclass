@@ -15,8 +15,7 @@ export default function AdminLoginPage() {
           Enter your admin email and password to access the admin panel.
         </p>
         <p className="mt-2 text-xs text-slate-500">
-          Sent back here after signing in? Add to <code className="rounded bg-slate-100 px-1">.env.local</code>:{" "}
-          <code className="rounded bg-slate-100 px-1">ADMIN_EMAIL_OVERRIDE=your@email.com</code> (your login email), then restart the dev server. Or in Supabase: run migration <strong>20260224200000_profiles_trigger_and_grant_admin.sql</strong>, then <code className="rounded bg-slate-100 px-1">select grant_admin(&apos;your@email.com&apos;);</code>
+          Sent back here after signing in? Your account needs admin access. <strong>Local:</strong> In <code className="rounded bg-slate-100 px-1">.env.local</code> set <code className="rounded bg-slate-100 px-1">ADMIN_EMAIL_OVERRIDE=your@email.com</code> (your login email) and restart the dev server. <strong>Production (e.g. Netlify):</strong> In your host&apos;s Environment variables add <code className="rounded bg-slate-100 px-1">ADMIN_EMAIL_OVERRIDE</code> = your login email, then redeploy. Alternatively run the Supabase migration <strong>20260224200000_profiles_trigger_and_grant_admin.sql</strong> and <code className="rounded bg-slate-100 px-1">select grant_admin(&apos;your@email.com&apos;);</code>
         </p>
       </div>
       <AdminLoginForm />
