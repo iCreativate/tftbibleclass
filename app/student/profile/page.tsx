@@ -19,8 +19,8 @@ type SettingsState = {
 };
 
 const defaultState: SettingsState = {
-  name: "Demo Student",
-  email: "student@example.com",
+  name: "",
+  email: "",
   preferredTranslation: "ESV",
   notifications: "Email and in-app",
   timezone: "Africa/Johannesburg",
@@ -65,7 +65,8 @@ export default function StudentProfilePage() {
         setSettings(current => {
           const next: SettingsState = {
             ...current,
-            name: data.full_name ?? current.name,
+            name: data.full_name ?? "",
+            email: data.email ?? "",
             preferredTranslation:
               data.preferred_translation ?? current.preferredTranslation,
             notifications: data.notifications ?? current.notifications,
@@ -207,13 +208,14 @@ export default function StudentProfilePage() {
                   updateSettings({ name: event.target.value })
                 }
                 className="h-9 border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400"
-                placeholder="Your name"
+                placeholder={loading ? "Loading…" : "Your name"}
+                disabled={loading}
               />
             </div>
             <div className="space-y-1">
               <span className="text-slate-600">Email</span>
               <p className="text-xs font-medium text-slate-900">
-                {settings.email}
+                {loading ? "…" : (settings.email || "—")}
               </p>
               <p className="text-[11px] text-slate-500">
                 Email is managed through your account login.

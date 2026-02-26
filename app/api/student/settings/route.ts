@@ -33,6 +33,7 @@ export async function GET() {
 
   const merged = {
     full_name: data?.full_name ?? null,
+    email: user.email ?? null,
     preferred_translation:
       data?.preferred_translation ?? defaultSettings.preferred_translation,
     notifications: data?.notifications ?? defaultSettings.notifications,
