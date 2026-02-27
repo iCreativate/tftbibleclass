@@ -193,29 +193,29 @@ export function AdminShell(props: AdminShellProps) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-56">
-        <header className="sticky top-0 z-20 flex h-14 min-h-[3.5rem] items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 shadow-sm md:px-6">
+        <header className="sticky top-0 z-20 flex h-14 min-h-[3.5rem] items-center justify-between gap-2 border-b border-primary-800/30 bg-primary px-4 shadow-sm md:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white/90 hover:bg-white/10 hover:text-white lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm text-slate-500">
+            <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto text-sm text-white/80">
               {breadcrumbs.map((b, i) => (
                 <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <ChevronRight className="h-4 w-4 text-slate-300" />}
+                  {i > 0 && <ChevronRight className="h-4 w-4 text-white/40" />}
                   {b.href ? (
                     <Link
                       href={b.href}
-                      className="hover:text-slate-900 transition-colors"
+                      className="hover:text-white transition-colors"
                     >
                       {b.label}
                     </Link>
                   ) : (
-                    <span className="font-medium text-slate-900">{b.label}</span>
+                    <span className="font-medium text-white">{b.label}</span>
                   )}
                 </span>
               ))}
@@ -224,7 +224,7 @@ export function AdminShell(props: AdminShellProps) {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="hidden text-sm text-slate-500 hover:text-slate-700 sm:block"
+              className="hidden text-sm text-white/80 hover:text-white sm:block"
             >
               View site
             </Link>

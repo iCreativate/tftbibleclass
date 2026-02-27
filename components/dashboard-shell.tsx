@@ -132,28 +132,28 @@ export function DashboardShell(props: DashboardShellProps) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-14 min-h-[3.5rem] items-center justify-between gap-3 border-b border-slate-200/80 bg-white/95 px-4 shadow-soft backdrop-blur-sm sm:h-16 md:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex h-14 min-h-[3.5rem] items-center justify-between gap-3 border-b border-primary-800/30 bg-primary px-4 shadow-soft sm:h-16 md:px-6 lg:px-8">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white/90 hover:bg-white/10 hover:text-white lg:hidden"
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="truncate font-heading text-base font-semibold text-slate-900 sm:text-lg">
+              <h1 className="truncate font-heading text-base font-semibold text-white sm:text-lg">
                 {props.title}
               </h1>
               {props.description && (
-                <p className="truncate text-xs text-slate-500 mt-0.5">{props.description}</p>
+                <p className="truncate text-xs text-white/80 mt-0.5">{props.description}</p>
               )}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-            <p className="hidden text-xs text-slate-500 sm:block">
-              <NotebookTabs className="mr-1.5 inline h-4 w-4 text-primary" />
+            <p className="hidden text-xs text-white/80 sm:block">
+              <NotebookTabs className="mr-1.5 inline h-4 w-4 text-white/90" />
               One step at a time.
             </p>
             <LogoutButton />
@@ -165,55 +165,29 @@ export function DashboardShell(props: DashboardShellProps) {
         </main>
 
         <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-slate-200/80 bg-white/95 shadow-soft backdrop-blur-sm lg:hidden">
-          <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-0.5 px-2 py-2">
-            <Link
-              href={props.navItems[0]?.href ?? "/student"}
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors",
-                pathname === (props.navItems[0]?.href ?? "/student")
-                  ? "text-primary bg-primary/10"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              )}
-            >
-              <LayoutDashboard className="h-5 w-5" />
-              <span>Home</span>
-            </Link>
-            <Link
-              href="/student/courses"
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors",
-                pathname.startsWith("/student/courses")
-                  ? "text-primary bg-primary/10"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              )}
-            >
-              <BookOpen className="h-5 w-5" />
-              <span>Courses</span>
-            </Link>
-            <Link
-              href="/student/progress"
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors",
-                pathname.startsWith("/student/progress")
-                  ? "text-primary bg-primary/10"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              )}
-            >
-              <Trophy className="h-5 w-5" />
-              <span>Progress</span>
-            </Link>
-            <Link
-              href="/student/profile"
-              className={cn(
-                "flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors",
-                pathname.startsWith("/student/profile")
-                  ? "text-primary bg-primary/10"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              )}
-            >
-              <User className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
+          <div className="mx-auto flex w-full max-w-full items-center gap-0.5 overflow-x-auto px-2 py-2">
+            {props.navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/admin" && pathname.startsWith(item.href));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex flex-none flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                  )}
+                >
+                  <span className="flex h-5 w-5 items-center justify-center">
+                    {item.icon ?? <LayoutDashboard className="h-5 w-5" />}
+                  </span>
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </nav>
       </div>
