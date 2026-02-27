@@ -27,12 +27,23 @@ export async function GET() {
     .eq("id", user.id)
     .maybeSingle();
 
+  // If RLS/policies aren't applied correctly yet (or profiles row is missing),
+  // don't fail the whole profile page. Return defaults plus session email/name.
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({
+      full_name: user.profile?.full_name ?? null,
+      email: user.email ?? null,
+      preferred_translation: defaultSettings.preferred_translation,
+      notifications: defaultSettings.notifications,
+      timezone: defaultSettings.timezone,
+      profile_photo_mode: defaultSettings.profile_photo_mode,
+      study_reminders: defaultSettings.study_reminders,
+      theme: defaultSettings.theme,
+    });
   }
 
   const merged = {
-    full_name: data?.full_name ?? null,
+    full_name: data?.full_name ?? user.profile?.full_name ?? null,
     email: user.email ?? null,
     preferred_translation:
       data?.preferred_translation ?? defaultSettings.preferred_translation,

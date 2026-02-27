@@ -1,5 +1,5 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { ThemeProvider } from "next-themes";
@@ -19,6 +19,12 @@ const dmSerif = DM_Serif_Display({
   preload: false,
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "TFT Bible Class",
   description:
@@ -33,10 +39,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout(props: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${dmSerif.variable}`}>
-      <body className="min-h-screen bg-surface font-body text-slate-800 antialiased">
+    <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${dmSerif.variable} overflow-x-hidden`}>
+      <body className="min-h-screen min-w-0 bg-surface font-body text-slate-800 antialiased overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden">
             {props.children}
           </div>
           <Toaster richColors position="top-center" />

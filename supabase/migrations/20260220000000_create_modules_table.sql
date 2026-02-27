@@ -17,6 +17,7 @@ create table if not exists public.modules (
 
 alter table public.modules enable row level security;
 
+drop policy if exists "Modules visible with course" on public.modules;
 create policy "Modules visible with course" on public.modules
   for select using (
     exists (
@@ -26,12 +27,14 @@ create policy "Modules visible with course" on public.modules
     )
   );
 
+drop policy if exists "Admins can view all modules" on public.modules;
 create policy "Admins can view all modules" on public.modules
   for select using (
     exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
   );
 
 -- Allow admins/facilitators to manage modules for courses they can manage
+drop policy if exists "Facilitators and admins manage modules" on public.modules;
 create policy "Facilitators and admins manage modules" on public.modules
   for all using (
     exists (

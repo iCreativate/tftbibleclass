@@ -309,6 +309,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Preferred Bible translation</span>
               <select
+                id="preferred-translation"
+                name="preferred_translation"
                 value={settings.preferredTranslation}
                 onChange={event =>
                   updateSettings({
@@ -327,6 +329,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Notification preferences</span>
               <select
+                id="notifications"
+                name="notifications"
                 value={settings.notifications}
                 onChange={event =>
                   updateSettings({
@@ -351,6 +355,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Timezone</span>
               <select
+                id="timezone"
+                name="timezone"
                 value={settings.timezone}
                 onChange={event =>
                   updateSettings({
@@ -369,6 +375,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Profile photo</span>
               <select
+                id="profile-photo-mode"
+                name="profile_photo_mode"
                 value={settings.profilePhotoMode}
                 onChange={event =>
                   updateSettings({
@@ -384,6 +392,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Study reminders</span>
               <select
+                id="study-reminders"
+                name="study_reminders"
                 value={settings.studyReminders}
                 onChange={event =>
                   updateSettings({
@@ -403,6 +413,8 @@ export default function StudentProfilePage() {
             <div className="space-y-1">
               <span className="text-slate-600">Theme</span>
               <select
+                id="theme"
+                name="theme"
                 value={settings.theme}
                 onChange={event => {
                   const value = event.target.value;

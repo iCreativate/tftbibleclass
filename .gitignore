@@ -21,3 +21,6 @@ npm-debug.log*
 .DS_Store
 .idea
 .vscode
+
+# Supabase CLI
+supabase/.temp/

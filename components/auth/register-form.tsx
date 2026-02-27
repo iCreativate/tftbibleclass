@@ -26,8 +26,14 @@ export function RegisterForm(props: RegisterFormProps) {
     try {
       const supabase = createSupabaseBrowserClient();
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            name: fullName.trim()
+          }
+        }
       });
       if (error) {
         const message = error.message || "Unable to create an account right now";
@@ -40,11 +46,14 @@ export function RegisterForm(props: RegisterFormProps) {
       }
 
       if (data.user) {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          full_name: fullName,
-          role: "student"
-        });
+        await supabase.from("profiles").upsert(
+          {
+            id: data.user.id,
+            full_name: fullName.trim() || (data.user.user_metadata?.full_name ?? data.user.user_metadata?.name) ?? null,
+            role: "student"
+          },
+          { onConflict: "id" }
+        );
       }
 
       const needsEmailConfirmation = !data.session;
