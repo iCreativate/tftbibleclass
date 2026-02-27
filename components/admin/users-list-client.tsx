@@ -177,6 +177,8 @@ export function AdminUsersListClient({
               <p className="text-sm font-semibold text-slate-800">Enroll in a course</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <select
+                  id="enroll-course"
+                  name="enroll_course"
                   value={courseToAdd}
                   onChange={(e) => setCourseToAdd(e.target.value)}
                   className="h-9 min-w-[240px] rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800"

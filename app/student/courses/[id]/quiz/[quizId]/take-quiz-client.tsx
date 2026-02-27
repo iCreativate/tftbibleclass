@@ -430,6 +430,8 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                           <span className="min-w-0 flex-1 text-sm text-slate-800">{stem}</span>
                           <span className="text-slate-400">→</span>
                           <select
+                            id={`match-answer-${q.id}-${si}`}
+                            name={`match_answer_${q.id}_${si}`}
                             value={ansArr[si] ?? ""}
                             onChange={(e) => handleChangeMatch(q.id, si, parseInt(e.target.value, 10))}
                             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"

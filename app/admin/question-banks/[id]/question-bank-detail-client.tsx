@@ -80,11 +80,13 @@ export function QuestionBankDetailClient({
         Add question
       </button>
 
-      {showForm && (
+          {showForm && (
         <form onSubmit={handleAdd} className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Type</label>
+            <label htmlFor="bank-question-type" className="block text-xs font-medium text-slate-500 mb-1">Type</label>
             <select
+              id="bank-question-type"
+              name="bank_question_type"
               value={type}
               onChange={(e) => setType(e.target.value as typeof type)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"

@@ -286,10 +286,12 @@ export function QuizEditorClient({
             className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
           >
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-500">
+              <label htmlFor="quiz-question-type" className="mb-1 block text-xs font-medium text-slate-500">
                 Question type
               </label>
               <select
+                id="quiz-question-type"
+                name="quiz_question_type"
                 value={type}
                 onChange={(e) => setType(e.target.value as QuizQuestionType)}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
@@ -357,9 +359,11 @@ export function QuizEditorClient({
                       className="min-w-[200px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
                       placeholder="e.g. We are redeemed from the curse of the law"
                     />
-                    <label className="flex items-center gap-1.5 text-sm">
+                    <label htmlFor={`match-option-${i}`} className="flex items-center gap-1.5 text-sm">
                       <span className="text-slate-500">→</span>
                       <select
+                        id={`match-option-${i}`}
+                        name={`match_option_${i}`}
                         value={matchMapping[i] ?? 0}
                         onChange={(e) => setMatchMappingAt(i, parseInt(e.target.value, 10))}
                         className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm"

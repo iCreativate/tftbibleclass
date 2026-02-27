@@ -12,24 +12,55 @@ const defaultSettings = {
 };
 
 export async function GET() {
-  const supabase = createSupabaseServerClient();
   const user = await getSessionUser();
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "full_name, preferred_translation, notifications, timezone, profile_photo_mode, study_reminders, theme"
-    )
-    .eq("id", user.id)
-    .maybeSingle();
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(
+        "full_name, preferred_translation, notifications, timezone, profile_photo_mode, study_reminders, theme"
+      )
+      .eq("id", user.id)
+      .maybeSingle();
 
-  // If RLS/policies aren't applied correctly yet (or profiles row is missing),
-  // don't fail the whole profile page. Return defaults plus session email/name.
-  if (error) {
+    // If RLS/policies aren't applied correctly yet (or profiles row is missing),
+    // don't fail the whole profile page. Return defaults plus session email/name.
+    if (error) {
+      return NextResponse.json({
+        full_name: user.profile?.full_name ?? null,
+        email: user.email ?? null,
+        preferred_translation: defaultSettings.preferred_translation,
+        notifications: defaultSettings.notifications,
+        timezone: defaultSettings.timezone,
+        profile_photo_mode: defaultSettings.profile_photo_mode,
+        study_reminders: defaultSettings.study_reminders,
+        theme: defaultSettings.theme,
+      });
+    }
+
+    const merged = {
+      full_name: data?.full_name ?? user.profile?.full_name ?? null,
+      email: user.email ?? null,
+      preferred_translation:
+        data?.preferred_translation ?? defaultSettings.preferred_translation,
+      notifications: data?.notifications ?? defaultSettings.notifications,
+      timezone: data?.timezone ?? defaultSettings.timezone,
+      profile_photo_mode:
+        data?.profile_photo_mode ?? defaultSettings.profile_photo_mode,
+      study_reminders:
+        data?.study_reminders ?? defaultSettings.study_reminders,
+      theme: data?.theme ?? defaultSettings.theme
+    };
+
+    return NextResponse.json(merged);
+  } catch {
+    // If anything goes wrong (e.g. env misconfig, RLS, missing table),
+    // still respond with safe defaults so the profile page can render.
     return NextResponse.json({
       full_name: user.profile?.full_name ?? null,
       email: user.email ?? null,
@@ -41,22 +72,6 @@ export async function GET() {
       theme: defaultSettings.theme,
     });
   }
-
-  const merged = {
-    full_name: data?.full_name ?? user.profile?.full_name ?? null,
-    email: user.email ?? null,
-    preferred_translation:
-      data?.preferred_translation ?? defaultSettings.preferred_translation,
-    notifications: data?.notifications ?? defaultSettings.notifications,
-    timezone: data?.timezone ?? defaultSettings.timezone,
-    profile_photo_mode:
-      data?.profile_photo_mode ?? defaultSettings.profile_photo_mode,
-    study_reminders:
-      data?.study_reminders ?? defaultSettings.study_reminders,
-    theme: data?.theme ?? defaultSettings.theme
-  };
-
-  return NextResponse.json(merged);
 }
 
 export async function PUT(request: Request) {
