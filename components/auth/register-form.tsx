@@ -46,10 +46,16 @@ export function RegisterForm(props: RegisterFormProps) {
       }
 
       if (data.user) {
+        const trimmedName = fullName.trim();
+        const metaFullName =
+          (data.user.user_metadata?.full_name as string | undefined) ||
+          (data.user.user_metadata?.name as string | undefined) ||
+          null;
+
         await supabase.from("profiles").upsert(
           {
             id: data.user.id,
-            full_name: fullName.trim() || (data.user.user_metadata?.full_name ?? data.user.user_metadata?.name) ?? null,
+            full_name: trimmedName || metaFullName,
             role: "student"
           },
           { onConflict: "id" }
