@@ -49,16 +49,23 @@ function getEmbedProps(url: string): { type: "youtube" | "vimeo" | "direct"; src
   }
 }
 
+interface YTPlayerInstance {
+  destroy?: () => void;
+}
+
 declare global {
   interface Window {
-    YT?: { Player: new (el: string | HTMLElement, opts: Record<string, unknown>) => { destroy: () => void }; PlayerState: { ENDED: number } };
+    YT?: {
+      Player: new (el: string | HTMLElement, opts: Record<string, unknown>) => YTPlayerInstance;
+      PlayerState: { ENDED: number };
+    };
     onYouTubeIframeAPIReady?: () => void;
   }
 }
 
 function YouTubePlayerWithEndOverlay({ videoId }: { videoId: string }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const playerRef = React.useRef<ReturnType<NonNullable<typeof window.YT>["Player"]> | null>(null);
+  const playerRef = React.useRef<YTPlayerInstance | null>(null);
   const [videoEnded, setVideoEnded] = React.useState(false);
 
   React.useEffect(() => {
