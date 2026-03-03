@@ -5,7 +5,7 @@ async function loadCourses() {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("courses")
-    .select("id, slug, title, description, difficulty, estimated_minutes, is_published, created_at")
+    .select("id, slug, title, description, difficulty, estimated_minutes, is_published, created_at, available_from, available_until")
     .order("created_at", { ascending: false })
     .limit(50);
 

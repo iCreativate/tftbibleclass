@@ -104,6 +104,30 @@ export function NewCourseForm({
           />
         </div>
       </div>
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-slate-600">Schedule (optional)</p>
+        <p className="text-[11px] text-slate-500">When this course is visible to students. Leave blank for no restriction.</p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label htmlFor="available_from">Available from</Label>
+            <Input
+              id="available_from"
+              name="available_from"
+              type="datetime-local"
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="available_until">Available until</Label>
+            <Input
+              id="available_until"
+              name="available_until"
+              type="datetime-local"
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
       <div className="flex items-center gap-2">
         <input
           type="checkbox"

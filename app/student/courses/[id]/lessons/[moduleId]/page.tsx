@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
-import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay } from "@/lib/courses";
+import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay, isWithinSchedule } from "@/lib/courses";
 import { LessonVideoPlayer } from "@/components/lesson-video-player";
 import { MarkLessonCompleteButton } from "./mark-complete-button";
 import { Download, FileText, ArrowLeft, FileQuestion } from "lucide-react";
@@ -35,12 +35,13 @@ export default async function StudentLessonPage({ params }: Props) {
   const supabase = createSupabaseServerClient();
   const { data: moduleRow } = await supabase
     .from("modules")
-    .select("id, title, description, video_url, audio_url, pdf_url, scripture_reference, rich_text")
+    .select("id, title, description, video_url, audio_url, pdf_url, scripture_reference, rich_text, available_from, available_until")
     .eq("id", moduleId)
     .eq("course_id", courseId)
     .single();
 
   if (!moduleRow) notFound();
+  if (!isStaff && !isWithinSchedule(moduleRow.available_from, moduleRow.available_until)) notFound();
 
   await setLastAccessedModule(user.id, courseId, moduleId);
 

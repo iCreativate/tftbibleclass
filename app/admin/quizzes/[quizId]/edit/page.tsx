@@ -4,6 +4,7 @@ import { getQuizWithQuestions, getQuizAttemptsAndStats } from "../../actions";
 import { QuizEditorClient } from "./quiz-editor-client";
 import { QuizSettingsForm } from "./quiz-settings-form";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { DeleteQuizButton } from "../../delete-quiz-button";
 
 export default async function QuizEditPage({ params }: { params: Promise<{ quizId: string }> | { quizId: string } }) {
   const resolved = typeof (params as Promise<{ quizId: string }>).then === "function" ? await (params as Promise<{ quizId: string }>) : (params as { quizId: string });
@@ -56,12 +57,25 @@ export default async function QuizEditPage({ params }: { params: Promise<{ quizI
               </Link>
             </>
           )}
+          <DeleteQuizButton
+            quizId={quizId}
+            quizTitle={data.quiz.title}
+            className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+            redirectTo="/admin/quizzes"
+          />
         </div>
       </div>
 
       <QuizSettingsForm
         quizId={quizId}
-        initial={{ title: data.quiz.title, description: data.quiz.description, passing_score: data.quiz.passing_score, time_limit_seconds: data.quiz.time_limit_seconds }}
+        initial={{
+          title: data.quiz.title,
+          description: data.quiz.description,
+          passing_score: data.quiz.passing_score,
+          time_limit_seconds: data.quiz.time_limit_seconds,
+          module_id: data.quiz.module_id,
+          course_id: data.course_id,
+        }}
       />
 
       <QuizEditorClient

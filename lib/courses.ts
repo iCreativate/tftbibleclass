@@ -9,15 +9,27 @@ export type CourseForCard = {
   thumbnail_url: string | null;
 };
 
-/** Published courses (catalog). */
+/** True if current time is within the optional available_from / available_until window. */
+export function isWithinSchedule(
+  availableFrom: string | null | undefined,
+  availableUntil: string | null | undefined
+): boolean {
+  const now = new Date();
+  if (availableFrom && new Date(availableFrom) > now) return false;
+  if (availableUntil && new Date(availableUntil) < now) return false;
+  return true;
+}
+
+/** Published courses (catalog), only those currently within their schedule window. */
 export async function getPublishedCourses(): Promise<CourseForCard[]> {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("courses")
-    .select("id, title, description, difficulty, estimated_minutes, thumbnail_url")
+    .select("id, title, description, difficulty, estimated_minutes, thumbnail_url, available_from, available_until")
     .eq("is_published", true)
     .order("created_at", { ascending: false });
-  return data ?? [];
+  const list = data ?? [];
+  return list.filter((c) => isWithinSchedule(c.available_from, c.available_until)).map(({ available_from: _af, available_until: _au, ...rest }) => rest);
 }
 
 /** Enrolled courses for the current user (requires auth). */
@@ -31,12 +43,13 @@ export async function getEnrolledCourses(userId: string): Promise<(CourseForCard
   if (!enrollments?.length) return [];
 
   const courseIds = enrollments.map((e) => e.course_id);
-  const { data: courses } = await supabase
+  const { data: coursesRaw } = await supabase
     .from("courses")
-    .select("id, title, description, difficulty, estimated_minutes, thumbnail_url")
+    .select("id, title, description, difficulty, estimated_minutes, thumbnail_url, available_from, available_until")
     .in("id", courseIds)
     .eq("is_published", true);
 
+  const courses = (coursesRaw ?? []).filter((c) => isWithinSchedule(c.available_from, c.available_until)).map(({ available_from: _af, available_until: _au, ...rest }) => rest);
   if (!courses?.length) return [];
 
   const { data: progressRows } = await supabase
@@ -73,7 +86,7 @@ export async function getEnrolledCourses(userId: string): Promise<(CourseForCard
   });
 }
 
-/** Enrolled courses with their modules (for message topic dropdown). */
+/** Enrolled courses with their modules (for message topic dropdown). Only modules currently within schedule are included. */
 export async function getEnrolledCoursesWithModules(
   userId: string
 ): Promise<{ id: string; title: string; modules: { id: string; title: string }[] }[]> {
@@ -83,11 +96,12 @@ export async function getEnrolledCoursesWithModules(
   const courseIds = enrolled.map((c) => c.id);
   const { data: modules } = await supabase
     .from("modules")
-    .select("id, course_id, title, index_in_course")
+    .select("id, course_id, title, index_in_course, available_from, available_until")
     .in("course_id", courseIds)
     .order("index_in_course", { ascending: true });
   const modulesByCourse = new Map<string, { id: string; title: string }[]>();
   for (const m of modules ?? []) {
+    if (!isWithinSchedule(m.available_from, m.available_until)) continue;
     const list = modulesByCourse.get(m.course_id) ?? [];
     list.push({ id: m.id, title: m.title });
     modulesByCourse.set(m.course_id, list);
@@ -134,7 +148,7 @@ export async function getPublishedCourseById(courseId: string): Promise<CourseFo
   return data;
 }
 
-/** Course by id for a student: must be published OR user enrolled. When allowStaffBypass is true, admins and facilitators get the course even if not enrolled (e.g. for Test quiz). */
+/** Course by id for a student: must be published (and within schedule) OR user enrolled. Staff can bypass schedule. */
 export async function getCourseForStudent(
   courseId: string,
   userId: string,
@@ -143,13 +157,15 @@ export async function getCourseForStudent(
   const supabase = createSupabaseServerClient();
   const { data: course } = await supabase
     .from("courses")
-    .select("id, slug, title, description, difficulty, estimated_minutes, thumbnail_url, is_published")
+    .select("id, slug, title, description, difficulty, estimated_minutes, thumbnail_url, is_published, available_from, available_until")
     .eq("id", courseId)
     .single();
 
   if (!course) return null;
-  const { is_published: _, ...rest } = course;
-  if (course.is_published) return rest as CourseForCard & { slug: string };
+  const { is_published: _, available_from, available_until, ...rest } = course;
+  const withinSchedule = isWithinSchedule(available_from, available_until);
+
+  if (course.is_published && withinSchedule) return rest as CourseForCard & { slug: string };
 
   if (options?.allowStaffBypass) {
     const { data: profile } = await supabase
@@ -168,7 +184,9 @@ export async function getCourseForStudent(
     .eq("course_id", courseId)
     .single();
 
-  return enrolled ? (rest as CourseForCard & { slug: string }) : null;
+  if (!enrolled) return null;
+  if (course.is_published && !withinSchedule) return null;
+  return rest as CourseForCard & { slug: string };
 }
 
 export type CourseMaterial = {
@@ -200,16 +218,17 @@ export async function getModuleMaterialsForDisplay(moduleId: string): Promise<Co
   return (data ?? []) as CourseMaterial[];
 }
 
-/** Modules (lessons) for a course with their attached materials and quiz flag. For course preview / catalog. */
+/** Modules (lessons) for a course with their attached materials and quiz flag. Only modules currently within schedule are returned. */
 export async function getCourseModulesWithMaterials(courseId: string): Promise<
   { id: string; title: string; index_in_course: number; materials: CourseMaterial[]; hasQuiz: boolean; quiz_id: string | null }[]
 > {
   const supabase = createSupabaseServerClient();
-  const { data: modules } = await supabase
+  const { data: modulesRaw } = await supabase
     .from("modules")
-    .select("id, title, index_in_course")
+    .select("id, title, index_in_course, available_from, available_until")
     .eq("course_id", courseId)
     .order("index_in_course", { ascending: true });
+  const modules = (modulesRaw ?? []).filter((m) => isWithinSchedule(m.available_from, m.available_until));
   if (!modules?.length) return [];
   const moduleIds = modules.map((m) => m.id);
   const { data: matRows } = await supabase
@@ -306,17 +325,18 @@ export type CourseModuleForStudent = {
   is_complete: boolean;
 };
 
-/** Modules (lessons) for a course the student can access, ordered, with attached materials and completion. */
+/** Modules (lessons) for a course the student can access, ordered, with attached materials and completion. Only modules currently within schedule are included. */
 export async function getCourseModulesForStudent(
   courseId: string,
   userId: string
 ): Promise<CourseModuleForStudent[]> {
   const supabase = createSupabaseServerClient();
-  const { data: modules } = await supabase
+  const { data: modulesRaw } = await supabase
     .from("modules")
-    .select("id, title, description, index_in_course")
+    .select("id, title, description, index_in_course, available_from, available_until")
     .eq("course_id", courseId)
     .order("index_in_course", { ascending: true });
+  const modules = (modulesRaw ?? []).filter((m) => isWithinSchedule(m.available_from, m.available_until));
   if (!modules?.length) return [];
   const moduleIds = modules.map((m) => m.id);
   // Use RPC so enrolled students see quizzes even if RLS policies are restrictive

@@ -37,6 +37,10 @@ export async function createCourse(
     ? slugify(slugInput)
     : slugify(title || "course");
   const publishNow = formData.get("publish_now") === "true";
+  const availableFromRaw = (formData.get("available_from") as string)?.trim();
+  const availableUntilRaw = (formData.get("available_until") as string)?.trim();
+  const available_from = availableFromRaw ? new Date(availableFromRaw).toISOString() : null;
+  const available_until = availableUntilRaw ? new Date(availableUntilRaw).toISOString() : null;
 
   if (!title) {
     return { error: "Title is required." };
@@ -53,6 +57,8 @@ export async function createCourse(
     estimated_minutes: estimatedMinutes,
     is_published: publishNow,
     created_by: user.id,
+    available_from: available_from || null,
+    available_until: available_until || null,
   }).select("id").single();
 
   if (error) {
@@ -96,6 +102,11 @@ export async function updateCourse(
 
   const thumbnailInput = (formData.get("thumbnail_url") as string)?.trim();
   if (thumbnailInput !== undefined) updates.thumbnail_url = thumbnailInput || null;
+
+  const availableFromRaw = (formData.get("available_from") as string)?.trim() ?? "";
+  const availableUntilRaw = (formData.get("available_until") as string)?.trim() ?? "";
+  updates.available_from = availableFromRaw ? new Date(availableFromRaw).toISOString() : null;
+  updates.available_until = availableUntilRaw ? new Date(availableUntilRaw).toISOString() : null;
 
   if (Object.keys(updates).length === 0) {
     return {};
@@ -650,13 +661,15 @@ export type ModuleRow = {
   pdf_url: string | null;
   scripture_reference: string | null;
   rich_text: unknown;
+  available_from: string | null;
+  available_until: string | null;
 };
 
 export async function getModule(moduleId: string): Promise<{ module: ModuleRow; courseTitle: string } | null> {
   const supabase = createSupabaseServerClient();
   const { data: module } = await supabase
     .from("modules")
-    .select("id, course_id, title, description, video_url, audio_url, pdf_url, scripture_reference, rich_text")
+    .select("id, course_id, title, description, video_url, audio_url, pdf_url, scripture_reference, rich_text, available_from, available_until")
     .eq("id", moduleId)
     .single();
   if (!module) return null;
@@ -678,6 +691,8 @@ export async function updateModule(
     pdf_url: string | null;
     scripture_reference: string | null;
     rich_text: unknown;
+    available_from: string | null;
+    available_until: string | null;
   }>
 ): Promise<{ error?: string }> {
   await requireRole("admin");

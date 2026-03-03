@@ -29,6 +29,62 @@ export async function getModulesByCourseId(courseId: string): Promise<{ id: stri
   return (data ?? []) as { id: string; title: string; index_in_course: number }[];
 }
 
+/** Delete a quiz (cascades questions + attempts). */
+export async function deleteQuiz(
+  quizId: string
+): Promise<{ error?: string }> {
+  await requireRole("admin");
+  const supabase = createSupabaseServerClient();
+  const { data: existing } = await supabase
+    .from("quizzes")
+    .select("id, module_id")
+    .eq("id", quizId)
+    .maybeSingle();
+  if (!existing) return { error: "Quiz not found." };
+
+  const { data: mod } = await supabase
+    .from("modules")
+    .select("course_id")
+    .eq("id", existing.module_id)
+    .maybeSingle();
+
+  const { error } = await supabase.from("quizzes").delete().eq("id", quizId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/quizzes");
+  revalidatePath(`/admin/quizzes/${quizId}/edit`);
+  if (mod?.course_id) revalidatePath(`/admin/courses/${mod.course_id}/builder`);
+  return {};
+}
+
+/** Reassign a quiz to a different lesson/topic (module). */
+export async function reassignQuizToModule(
+  quizId: string,
+  moduleId: string
+): Promise<{ error?: string; course_id?: string }> {
+  await requireRole("admin");
+  if (!moduleId) return { error: "Please select a lesson (module)." };
+  const supabase = createSupabaseServerClient();
+
+  const { data: moduleRow } = await supabase
+    .from("modules")
+    .select("id, course_id")
+    .eq("id", moduleId)
+    .single();
+  if (!moduleRow) return { error: "Lesson not found." };
+
+  const { error } = await supabase
+    .from("quizzes")
+    .update({ module_id: moduleId })
+    .eq("id", quizId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/quizzes");
+  revalidatePath(`/admin/quizzes/${quizId}/edit`);
+  revalidatePath(`/admin/courses/${moduleRow.course_id}/builder`);
+  return { course_id: moduleRow.course_id };
+}
+
 /** Create a new quiz assigned to a module (lesson). */
 export async function createQuiz(
   moduleId: string,

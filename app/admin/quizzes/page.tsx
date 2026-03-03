@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
 import { Plus, Pencil, Eye, Play } from "lucide-react";
+import { DeleteQuizButton } from "./delete-quiz-button";
 
 async function loadQuizzes() {
   const supabase = createSupabaseServerClient();
@@ -161,6 +162,7 @@ export default async function AdminQuizzesPage() {
                         Test
                       </Link>
                     )}
+                    <DeleteQuizButton quizId={quiz.id} quizTitle={quiz.title} />
                   </div>
                 </div>
               </div>

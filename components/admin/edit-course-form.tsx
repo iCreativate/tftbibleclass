@@ -32,6 +32,8 @@ type Course = {
   description: string | null;
   difficulty: string;
   estimated_minutes: number;
+  available_from?: string | null;
+  available_until?: string | null;
 };
 
 export function EditCourseForm({
@@ -177,6 +179,32 @@ export function EditCourseForm({
               defaultValue={course.estimated_minutes}
               className="w-full"
             />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-slate-600">Schedule (optional)</p>
+          <p className="text-[11px] text-slate-500">When this course is visible to students. Leave blank for no restriction.</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label htmlFor="edit-available_from">Available from</Label>
+              <Input
+                id="edit-available_from"
+                name="available_from"
+                type="datetime-local"
+                defaultValue={course.available_from ? new Date(course.available_from).toISOString().slice(0, 16) : ""}
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-available_until">Available until</Label>
+              <Input
+                id="edit-available_until"
+                name="available_until"
+                type="datetime-local"
+                defaultValue={course.available_until ? new Date(course.available_until).toISOString().slice(0, 16) : ""}
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
         <div className="flex justify-end gap-2">

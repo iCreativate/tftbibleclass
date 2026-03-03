@@ -63,6 +63,8 @@ export function LessonEditorClient({
     setSaving(true);
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const availableFromRaw = (formData.get("available_from") as string)?.trim() ?? "";
+    const availableUntilRaw = (formData.get("available_until") as string)?.trim() ?? "";
     const result = await updateModule(module.id, {
       title: (formData.get("title") as string)?.trim() || module.title,
       description: (formData.get("description") as string)?.trim() || null,
@@ -71,6 +73,8 @@ export function LessonEditorClient({
       pdf_url: (formData.get("pdf_url") as string)?.trim() || null,
       scripture_reference: (formData.get("scripture_reference") as string)?.trim() || null,
       rich_text: (formData.get("rich_text") as string)?.trim() ? { content: formData.get("rich_text") } : null,
+      available_from: availableFromRaw ? new Date(availableFromRaw).toISOString() : null,
+      available_until: availableUntilRaw ? new Date(availableUntilRaw).toISOString() : null,
     });
     setSaving(false);
     if (result.error) setError(result.error);
@@ -83,6 +87,8 @@ export function LessonEditorClient({
         audio_url: (formData.get("audio_url") as string)?.trim() || null,
         pdf_url: (formData.get("pdf_url") as string)?.trim() || null,
         scripture_reference: (formData.get("scripture_reference") as string)?.trim() || null,
+        available_from: availableFromRaw ? new Date(availableFromRaw).toISOString() : null,
+        available_until: availableUntilRaw ? new Date(availableUntilRaw).toISOString() : null,
       }));
       router.refresh();
     }
@@ -219,6 +225,32 @@ export function LessonEditorClient({
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
               placeholder="Lesson text, notes, or instructions…"
             />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <p className="text-xs font-medium text-slate-600">Schedule (optional)</p>
+            <p className="text-[11px] text-slate-500">When this topic is visible to students. Leave blank for no restriction.</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="lesson-available_from">Available from</Label>
+                <Input
+                  id="lesson-available_from"
+                  name="available_from"
+                  type="datetime-local"
+                  defaultValue={module.available_from ? new Date(module.available_from).toISOString().slice(0, 16) : ""}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="lesson-available_until">Available until</Label>
+                <Input
+                  id="lesson-available_until"
+                  name="available_until"
+                  type="datetime-local"
+                  defaultValue={module.available_until ? new Date(module.available_until).toISOString().slice(0, 16) : ""}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
