@@ -536,24 +536,6 @@ export async function canStudentTakeQuiz(
 
   return { allowed: true, videoComplete, materialsAccessed };
 }
-    .maybeSingle();
-
-  const progressPercent = progress?.progress_percent ?? 0;
-  if (progressPercent < 100) {
-    return { allowed: false, reason: "Complete the lesson (watch the full video and mark it complete) before taking the assessment." };
-  }
-
-  const { count } = await supabase
-    .from("module_materials")
-    .select("id", { count: "exact", head: true })
-    .eq("module_id", moduleId);
-  const hasMaterials = (count ?? 0) > 0;
-  if (hasMaterials && !progress?.materials_accessed_at) {
-    return { allowed: false, reason: "Download or open at least one lesson resource below before taking the assessment." };
-  }
-
-  return { allowed: true };
-}
 
 export type CertificateRecord = {
   id: string;
