@@ -75,10 +75,14 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
 
   let quizAllowed = true;
   let quizBlockReason: string | undefined;
+  let videoComplete = false;
+  let materialsAccessed = false;
   if (!isStaff && quizId) {
     const check = await canStudentTakeQuiz(user.id, moduleId);
     quizAllowed = check.allowed;
     quizBlockReason = check.reason;
+    videoComplete = check.videoComplete;
+    materialsAccessed = check.materialsAccessed;
   }
 
   const resolvedSearchParams = typeof (searchParams as Promise<{ message?: string; reason?: string }> | undefined)?.then === "function"
@@ -111,6 +115,20 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
       <div className="space-y-6">
         {moduleRow.video_url && (
           <LessonVideoPlayer videoUrl={moduleRow.video_url} />
+        )}
+
+        {!isStaff && moduleRow.video_url && (
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+            <span
+              className={`inline-flex h-4 w-4 items-center justify-center rounded-full border text-[10px] ${
+                videoComplete ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white text-slate-400"
+              }`}
+              aria-hidden
+            >
+              ✓
+            </span>
+            <span>{videoComplete ? "Video completed" : "Watch the full video, then mark the lesson complete."}</span>
+          </div>
         )}
 
         {moduleRow.audio_url && (
@@ -149,6 +167,19 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
               <Download className="h-5 w-5 text-primary" />
               Lesson resources
             </h2>
+            {!isStaff && (
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-600">
+                <span
+                  className={`inline-flex h-4 w-4 items-center justify-center rounded-full border text-[10px] ${
+                    materialsAccessed ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white text-slate-400"
+                  }`}
+                  aria-hidden
+                >
+                  ✓
+                </span>
+                <span>{materialsAccessed ? "Resources accessed" : "Open at least one resource above."}</span>
+              </div>
+            )}
             <ul className="space-y-2">
               {materials.map((m) => (
                 <li key={m.id}>
@@ -170,7 +201,7 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
         )}
       </div>
 
-      {(moduleRow.video_url || moduleRow.audio_url || richContent) && !quizId && (
+      {(moduleRow.video_url || moduleRow.audio_url || richContent) && (
         <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
           <p className="mb-2 text-sm text-slate-600">Mark this lesson complete when you&apos;ve finished watching or reading.</p>
           <MarkLessonCompleteButton courseId={courseId} moduleId={moduleId} />

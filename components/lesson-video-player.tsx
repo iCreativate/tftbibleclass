@@ -81,7 +81,6 @@ function YouTubePlayerWithEndOverlay({ videoId }: { videoId: string }) {
       containerRef.current.appendChild(el);
       playerRef.current = new window.YT!.Player(el, {
         videoId,
-        host: "https://www.youtube-nocookie.com",
         width: "100%",
         height: "100%",
         playerVars: { rel: 0, modestbranding: 1 },
@@ -158,8 +157,49 @@ export function LessonVideoPlayer({ videoUrl }: { videoUrl: string }) {
   }
 
   return (
+    <HtmlVideoWithNoForward src={props.src} />
+  );
+}
+
+function HtmlVideoWithNoForward({ src }: { src: string }) {
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const maxTimeRef = React.useRef(0);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    function handleTimeUpdate() {
+      const current = video.currentTime;
+      if (current > maxTimeRef.current + 0.35) {
+        // Tried to jump ahead – snap back to last watched position
+        video.currentTime = maxTimeRef.current;
+        return;
+      }
+      if (current > maxTimeRef.current) {
+        maxTimeRef.current = current;
+      }
+    }
+
+    function handleSeeking() {
+      const current = video.currentTime;
+      // Allow rewind (seeking to a lower time), block forward beyond max watched
+      if (current > maxTimeRef.current + 0.35) {
+        video.currentTime = maxTimeRef.current;
+      }
+    }
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("seeking", handleSeeking);
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("seeking", handleSeeking);
+    };
+  }, []);
+
+  return (
     <div className="rounded-xl border border-slate-200 bg-slate-900 shadow-sm">
-      <video src={props.src} controls className="w-full rounded-xl">
+      <video ref={videoRef} src={src} controls className="w-full rounded-xl">
         Your browser does not support the video tag.
       </video>
     </div>

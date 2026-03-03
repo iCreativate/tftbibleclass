@@ -500,13 +500,42 @@ export async function recordModuleMaterialsAccessed(
 export async function canStudentTakeQuiz(
   userId: string,
   moduleId: string
-): Promise<{ allowed: boolean; reason?: string }> {
+): Promise<{ allowed: boolean; reason?: string; videoComplete: boolean; materialsAccessed: boolean }> {
   const supabase = createSupabaseServerClient();
   const { data: progress } = await supabase
     .from("module_progress")
     .select("progress_percent, materials_accessed_at")
     .eq("user_id", userId)
-    .eq("module_id", moduleId)
+    .eq("module_id", moduleId);
+  const progressPercent = progress?.progress_percent ?? 0;
+  const videoComplete = progressPercent >= 100;
+  const materialsAccessed = Boolean(progress?.materials_accessed_at);
+
+  if (!videoComplete) {
+    return {
+      allowed: false,
+      reason: "Complete the lesson (watch the full video and mark it complete) before taking the assessment.",
+      videoComplete,
+      materialsAccessed,
+    };
+  }
+
+  const { count } = await supabase
+    .from("module_materials")
+    .select("id", { count: "exact", head: true })
+    .eq("module_id", moduleId);
+  const hasMaterials = (count ?? 0) > 0;
+  if (hasMaterials && !materialsAccessed) {
+    return {
+      allowed: false,
+      reason: "Download or open at least one lesson resource below before taking the assessment.",
+      videoComplete,
+      materialsAccessed,
+    };
+  }
+
+  return { allowed: true, videoComplete, materialsAccessed };
+}
     .maybeSingle();
 
   const progressPercent = progress?.progress_percent ?? 0;

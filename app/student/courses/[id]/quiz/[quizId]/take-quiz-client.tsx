@@ -274,6 +274,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       return (
                         <label
                           key={opt}
+                          htmlFor={`mcq-${q.id}-${opt.replace(/\s/g, "_")}`}
                           className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 px-4 py-3 text-left transition ${
                             selected
                               ? "border-primary bg-primary/10 text-primary"
@@ -291,6 +292,8 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                             ) : null}
                           </span>
                           <input
+                            id={`mcq-${q.id}-${opt.replace(/\s/g, "_")}`}
+                            name={`mcq_${q.id}`}
                             type="checkbox"
                             checked={selected}
                             onChange={(e) => handleChangeMcq(q.id, opt, e.target.checked)}
@@ -309,6 +312,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       return (
                         <label
                           key={opt}
+                          htmlFor={`single-${q.id}-${opt.replace(/\s/g, "_")}`}
                           className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 px-4 py-3 text-left transition ${
                             selected
                               ? "border-primary bg-primary/10 text-primary"
@@ -326,6 +330,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                             ) : null}
                           </span>
                           <input
+                            id={`single-${q.id}-${opt.replace(/\s/g, "_")}`}
                             type="radio"
                             name={q.id}
                             value={opt}
@@ -346,6 +351,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       return (
                         <label
                           key={val}
+                          htmlFor={`bool-${q.id}-${val}`}
                           className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition ${
                             selected
                               ? "border-primary bg-primary/10 text-primary"
@@ -361,6 +367,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                             {selected ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
                           </span>
                           <input
+                            id={`bool-${q.id}-${val}`}
                             type="radio"
                             name={q.id}
                             value={val}
@@ -385,10 +392,12 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       <div className="space-y-3">
                         {Array.from({ length: blankCount }, (_, bi) => (
                           <div key={bi}>
-                            <label className="mb-1 block text-xs font-medium text-slate-500">
+                            <label htmlFor={`fill-blank-${q.id}-${bi}`} className="mb-1 block text-xs font-medium text-slate-500">
                               Blank {bi + 1}
                             </label>
                             <input
+                              id={`fill-blank-${q.id}-${bi}`}
+                              name={`fill_blank_${q.id}_${bi}`}
                               type="text"
                               value={arr[bi] ?? ""}
                               onChange={(e) => handleChangeBlank(q.id, bi, e.target.value)}
@@ -402,6 +411,8 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                   }
                   return (
                     <input
+                      id={`short-${q.id}`}
+                      name={`short_${q.id}`}
                       type="text"
                       value={Array.isArray(answers[q.id]) ? (answers[q.id] as string[])[0] ?? "" : (answers[q.id] ?? "") as string}
                       onChange={(e) => handleChange(q.id, e.target.value)}
@@ -450,6 +461,8 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                 })()}
                 {q.type === "essay" && (
                   <textarea
+                    id={`essay-${q.id}`}
+                    name={`essay_${q.id}`}
                     value={answers[q.id] ?? ""}
                     onChange={(e) => handleChange(q.id, e.target.value)}
                     rows={4}
@@ -463,6 +476,8 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       Paste a link or note for your submission (instructor will review).
                     </p>
                     <input
+                      id={`file-upload-${q.id}`}
+                      name={`file_upload_${q.id}`}
                       type="text"
                       value={answers[q.id] ?? ""}
                       onChange={(e) => handleChange(q.id, e.target.value)}
