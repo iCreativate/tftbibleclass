@@ -506,7 +506,8 @@ export async function canStudentTakeQuiz(
     .from("module_progress")
     .select("progress_percent, materials_accessed_at")
     .eq("user_id", userId)
-    .eq("module_id", moduleId);
+    .eq("module_id", moduleId)
+    .maybeSingle();
   const progressPercent = progress?.progress_percent ?? 0;
   const videoComplete = progressPercent >= 100;
   const materialsAccessed = Boolean(progress?.materials_accessed_at);
