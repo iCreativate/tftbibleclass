@@ -2,11 +2,11 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
-import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay, isWithinSchedule, canStudentTakeQuiz } from "@/lib/courses";
+import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay, isWithinSchedule } from "@/lib/courses";
 import { LessonVideoPlayer } from "@/components/lesson-video-player";
 import { MarkLessonCompleteButton } from "./mark-complete-button";
 import { MaterialDownloadLink } from "./material-download-link";
-import { Download, FileText, ArrowLeft, FileQuestion, Lock } from "lucide-react";
+import { Download, FileText, ArrowLeft, FileQuestion } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -75,31 +75,8 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
       ? String((moduleRow.rich_text as { content?: string }).content ?? "")
       : "";
 
-  let quizAllowed = true;
-  let quizBlockReason: string | undefined;
-  let videoComplete = false;
-  let materialsAccessed = false;
-  if (!isStaff && quizId) {
-    const check = await canStudentTakeQuiz(user.id, moduleId);
-    quizAllowed = check.allowed;
-    quizBlockReason = check.reason;
-    videoComplete = check.videoComplete;
-    materialsAccessed = check.materialsAccessed;
-  }
-
-  const resolvedSearchParams = typeof (searchParams as Promise<{ message?: string; reason?: string }> | undefined)?.then === "function"
-    ? await (searchParams as Promise<{ message?: string; reason?: string }>)
-    : (searchParams as { message?: string; reason?: string } | undefined);
-  const showQuizLockedMessage = resolvedSearchParams?.message === "quiz_locked";
-  const quizLockedReason = resolvedSearchParams?.reason ?? quizBlockReason;
-
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      {showQuizLockedMessage && quizLockedReason && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {quizLockedReason}
-        </div>
-      )}
       <div>
         <Link
           href={`/student/courses/${courseId}`}
@@ -117,20 +94,6 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
       <div className="space-y-6">
         {moduleRow.video_url && (
           <LessonVideoPlayer videoUrl={moduleRow.video_url} />
-        )}
-
-        {!isStaff && moduleRow.video_url && (
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-            <span
-              className={`inline-flex h-4 w-4 items-center justify-center rounded-full border text-[10px] ${
-                videoComplete ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white text-slate-400"
-              }`}
-              aria-hidden
-            >
-              ✓
-            </span>
-            <span>{videoComplete ? "Video completed" : "Watch the full video, then mark the lesson complete."}</span>
-          </div>
         )}
 
         {moduleRow.audio_url && (
@@ -169,19 +132,6 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
               <Download className="h-5 w-5 text-primary" />
               Lesson resources
             </h2>
-            {!isStaff && (
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-600">
-                <span
-                  className={`inline-flex h-4 w-4 items-center justify-center rounded-full border text-[10px] ${
-                    materialsAccessed ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-300 bg-white text-slate-400"
-                  }`}
-                  aria-hidden
-                >
-                  ✓
-                </span>
-                <span>{materialsAccessed ? "Resources accessed" : "Open at least one resource above."}</span>
-              </div>
-            )}
             <ul className="space-y-2">
               {materials.map((m) => (
                 <li key={m.id}>
@@ -215,20 +165,13 @@ export default async function StudentLessonPage({ params, searchParams }: Props)
           <p className="mb-3 text-sm font-medium text-slate-700">
             Are you ready to test your knowledge? Take the assessment to see how well you&apos;ve understood this topic.
           </p>
-          {quizAllowed ? (
-            <Link
-              href={`/student/courses/${courseId}/quiz/${quizId}`}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"
-            >
-              <FileQuestion className="h-4 w-4" />
-              Take assessment
-            </Link>
-          ) : (
-            <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-medium text-slate-600">
-              <Lock className="h-4 w-4" />
-              Complete the full video and download the lesson resources above to unlock the assessment.
-            </div>
-          )}
+          <Link
+            href={`/student/courses/${courseId}/quiz/${quizId}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"
+          >
+            <FileQuestion className="h-4 w-4" />
+            Take assessment
+          </Link>
         </div>
       )}
 
