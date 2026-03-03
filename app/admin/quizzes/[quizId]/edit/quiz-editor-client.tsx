@@ -294,7 +294,7 @@ export function QuizEditorClient({
                 name="quiz_question_type"
                 value={type}
                 onChange={(e) => setType(e.target.value as QuizQuestionType)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
               >
                 {QUIZ_QUESTION_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -312,7 +312,7 @@ export function QuizEditorClient({
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={type === "fill_in_blank" ? 4 : 3}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                 placeholder={
                   type === "fill_in_blank"
                     ? "Use ___ (3+ underscores) for each blank. E.g.: Man is 1.1 ___ ; who lives in 1.2 ___ ; possessing 1.3 ___."
@@ -338,7 +338,7 @@ export function QuizEditorClient({
                   value={options}
                   onChange={(e) => setOptions(e.target.value)}
                   rows={4}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                   placeholder={type === "match" ? "Galatians 3:13&#10;Romans 6:23&#10;Romans 8:1&#10;2 Corinthians 5:18" : "Option A&#10;Option B&#10;Option C&#10;Option D"}
                 />
               </div>
@@ -356,7 +356,7 @@ export function QuizEditorClient({
                       type="text"
                       value={stem}
                       onChange={(e) => setMatchStemAt(i, e.target.value)}
-                      className="min-w-[200px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      className="min-w-[200px] flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                       placeholder="e.g. We are redeemed from the curse of the law"
                     />
                     <label htmlFor={`match-option-${i}`} className="flex items-center gap-1.5 text-sm">
@@ -366,7 +366,7 @@ export function QuizEditorClient({
                         name={`match_option_${i}`}
                         value={matchMapping[i] ?? 0}
                         onChange={(e) => setMatchMappingAt(i, parseInt(e.target.value, 10))}
-                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                        className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                       >
                         {matchOptions.length === 0 ? (
                           <option value={0}>Add options above</option>
@@ -434,7 +434,7 @@ export function QuizEditorClient({
                   type="text"
                   value={correctAnswer}
                   onChange={(e) => setCorrectAnswer(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                   placeholder={type === "boolean" ? "true or false" : "Exact option text"}
                 />
               </div>
@@ -455,7 +455,7 @@ export function QuizEditorClient({
                       value={(blankAnswers[i] ?? []).join("\n")}
                       onChange={(e) => setBlankAnswerForIndex(i, e.target.value)}
                       rows={2}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                       placeholder="spirit&#10;soul"
                     />
                   </div>
@@ -472,7 +472,7 @@ export function QuizEditorClient({
                   type="text"
                   value={scriptureReference}
                   onChange={(e) => setScriptureReference(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                   placeholder="e.g. John 3:16"
                 />
               </div>
@@ -485,7 +485,7 @@ export function QuizEditorClient({
                   min={1}
                   value={points}
                   onChange={(e) => setPoints(parseInt(e.target.value, 10) || 1)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                 />
               </div>
             </div>
@@ -498,7 +498,7 @@ export function QuizEditorClient({
                 value={explanation}
                 onChange={(e) => setExplanation(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                 placeholder="Shown after submission (for auto-graded) or after review"
               />
             </div>
