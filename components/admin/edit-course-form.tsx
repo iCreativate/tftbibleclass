@@ -150,7 +150,7 @@ export function EditCourseForm({
             name="description"
             rows={3}
             defaultValue={course.description ?? ""}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -160,7 +160,7 @@ export function EditCourseForm({
               id="edit-difficulty"
               name="difficulty"
               defaultValue={course.difficulty}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
             >
               {difficulties.map((d) => (
                 <option key={d} value={d}>

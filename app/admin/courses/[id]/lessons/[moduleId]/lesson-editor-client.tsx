@@ -182,7 +182,7 @@ export function LessonEditorClient({
               name="description"
               rows={2}
               defaultValue={module.description ?? ""}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
@@ -222,7 +222,7 @@ export function LessonEditorClient({
               name="rich_text"
               rows={6}
               defaultValue={typeof module.rich_text === "object" && module.rich_text && "content" in module.rich_text ? String((module.rich_text as { content?: string }).content ?? "") : ""}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
               placeholder="Lesson text, notes, or instructions…"
             />
           </div>
