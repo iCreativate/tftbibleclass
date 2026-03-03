@@ -170,10 +170,11 @@ function HtmlVideoWithNoForward({ src }: { src: string }) {
     if (!video) return;
 
     function handleTimeUpdate() {
-      const current = video.currentTime;
+      const el = videoRef.current;
+      if (!el) return;
+      const current = el.currentTime;
       if (current > maxTimeRef.current + 0.35) {
-        // Tried to jump ahead – snap back to last watched position
-        video.currentTime = maxTimeRef.current;
+        el.currentTime = maxTimeRef.current;
         return;
       }
       if (current > maxTimeRef.current) {
@@ -182,10 +183,11 @@ function HtmlVideoWithNoForward({ src }: { src: string }) {
     }
 
     function handleSeeking() {
-      const current = video.currentTime;
-      // Allow rewind (seeking to a lower time), block forward beyond max watched
+      const el = videoRef.current;
+      if (!el) return;
+      const current = el.currentTime;
       if (current > maxTimeRef.current + 0.35) {
-        video.currentTime = maxTimeRef.current;
+        el.currentTime = maxTimeRef.current;
       }
     }
 
