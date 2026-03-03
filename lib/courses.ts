@@ -464,6 +464,68 @@ export async function setModuleProgress(
   );
 }
 
+/** Record that the student has accessed (e.g. downloaded) learner materials for this module. Call when they open a material link. */
+export async function recordModuleMaterialsAccessed(
+  userId: string,
+  moduleId: string
+): Promise<void> {
+  const supabase = createSupabaseServerClient();
+  const { data: existing } = await supabase
+    .from("module_progress")
+    .select("materials_accessed_at")
+    .eq("user_id", userId)
+    .eq("module_id", moduleId)
+    .maybeSingle();
+  const now = new Date().toISOString();
+  if (existing) {
+    if (existing.materials_accessed_at) return;
+    await supabase
+      .from("module_progress")
+      .update({ materials_accessed_at: now, last_accessed_at: now })
+      .eq("user_id", userId)
+      .eq("module_id", moduleId);
+  } else {
+    await supabase.from("module_progress").insert({
+      user_id: userId,
+      module_id: moduleId,
+      progress_percent: 0,
+      completed: false,
+      last_accessed_at: now,
+      materials_accessed_at: now,
+    });
+  }
+}
+
+/** Whether a student is allowed to take the quiz for this module: must have completed video (progress 100%) and accessed materials (if any). */
+export async function canStudentTakeQuiz(
+  userId: string,
+  moduleId: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  const supabase = createSupabaseServerClient();
+  const { data: progress } = await supabase
+    .from("module_progress")
+    .select("progress_percent, materials_accessed_at")
+    .eq("user_id", userId)
+    .eq("module_id", moduleId)
+    .maybeSingle();
+
+  const progressPercent = progress?.progress_percent ?? 0;
+  if (progressPercent < 100) {
+    return { allowed: false, reason: "Complete the lesson (watch the full video and mark it complete) before taking the assessment." };
+  }
+
+  const { count } = await supabase
+    .from("module_materials")
+    .select("id", { count: "exact", head: true })
+    .eq("module_id", moduleId);
+  const hasMaterials = (count ?? 0) > 0;
+  if (hasMaterials && !progress?.materials_accessed_at) {
+    return { allowed: false, reason: "Download or open at least one lesson resource below before taking the assessment." };
+  }
+
+  return { allowed: true };
+}
+
 export type CertificateRecord = {
   id: string;
   course_id: string;

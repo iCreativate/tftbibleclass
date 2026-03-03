@@ -2,14 +2,18 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
-import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay, isWithinSchedule } from "@/lib/courses";
+import { getCourseForStudent, getCourseModulesForStudent, setLastAccessedModule, getModuleMaterialsForDisplay, isWithinSchedule, canStudentTakeQuiz } from "@/lib/courses";
 import { LessonVideoPlayer } from "@/components/lesson-video-player";
 import { MarkLessonCompleteButton } from "./mark-complete-button";
-import { Download, FileText, ArrowLeft, FileQuestion } from "lucide-react";
+import { MaterialDownloadLink } from "./material-download-link";
+import { Download, FileText, ArrowLeft, FileQuestion, Lock } from "lucide-react";
 
-type Props = { params: Promise<{ id: string; moduleId: string }> | { id: string; moduleId: string } };
+type Props = {
+  params: Promise<{ id: string; moduleId: string }> | { id: string; moduleId: string };
+  searchParams?: Promise<{ message?: string; reason?: string }> | { message?: string; reason?: string };
+};
 
-export default async function StudentLessonPage({ params }: Props) {
+export default async function StudentLessonPage({ params, searchParams }: Props) {
   const resolved =
     typeof (params as Promise<{ id: string; moduleId: string }>).then === "function"
       ? await (params as Promise<{ id: string; moduleId: string }>)
@@ -69,8 +73,27 @@ export default async function StudentLessonPage({ params }: Props) {
       ? String((moduleRow.rich_text as { content?: string }).content ?? "")
       : "";
 
+  let quizAllowed = true;
+  let quizBlockReason: string | undefined;
+  if (!isStaff && quizId) {
+    const check = await canStudentTakeQuiz(user.id, moduleId);
+    quizAllowed = check.allowed;
+    quizBlockReason = check.reason;
+  }
+
+  const resolvedSearchParams = typeof (searchParams as Promise<{ message?: string; reason?: string }> | undefined)?.then === "function"
+    ? await (searchParams as Promise<{ message?: string; reason?: string }>)
+    : (searchParams as { message?: string; reason?: string } | undefined);
+  const showQuizLockedMessage = resolvedSearchParams?.message === "quiz_locked";
+  const quizLockedReason = resolvedSearchParams?.reason ?? quizBlockReason;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      {showQuizLockedMessage && quizLockedReason && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {quizLockedReason}
+        </div>
+      )}
       <div>
         <Link
           href={`/student/courses/${courseId}`}
@@ -110,15 +133,14 @@ export default async function StudentLessonPage({ params }: Props) {
         )}
 
         {moduleRow.pdf_url && (
-          <a
+          <MaterialDownloadLink
+            moduleId={moduleId}
             href={moduleRow.pdf_url}
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-primary/30 hover:bg-primary/5"
           >
             <FileText className="h-5 w-5 text-primary" />
             <span className="font-medium text-slate-800">Open PDF / document</span>
-          </a>
+          </MaterialDownloadLink>
         )}
 
         {materials.length > 0 && (
@@ -130,10 +152,9 @@ export default async function StudentLessonPage({ params }: Props) {
             <ul className="space-y-2">
               {materials.map((m) => (
                 <li key={m.id}>
-                  <a
+                  <MaterialDownloadLink
+                    moduleId={moduleId}
                     href={m.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-primary/30 hover:bg-primary/5"
                   >
                     <Download className="h-4 w-4 shrink-0 text-primary" />
@@ -141,7 +162,7 @@ export default async function StudentLessonPage({ params }: Props) {
                     <span className="ml-auto rounded bg-slate-200 px-2 py-0.5 text-xs uppercase text-slate-600">
                       {m.format}
                     </span>
-                  </a>
+                  </MaterialDownloadLink>
                 </li>
               ))}
             </ul>
@@ -161,13 +182,20 @@ export default async function StudentLessonPage({ params }: Props) {
           <p className="mb-3 text-sm font-medium text-slate-700">
             Are you ready to test your knowledge? Take the assessment to see how well you&apos;ve understood this topic.
           </p>
-          <Link
-            href={`/student/courses/${courseId}/quiz/${quizId}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"
-          >
-            <FileQuestion className="h-4 w-4" />
-            Take assessment
-          </Link>
+          {quizAllowed ? (
+            <Link
+              href={`/student/courses/${courseId}/quiz/${quizId}`}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700"
+            >
+              <FileQuestion className="h-4 w-4" />
+              Take assessment
+            </Link>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-medium text-slate-600">
+              <Lock className="h-4 w-4" />
+              Complete the full video and download the lesson resources above to unlock the assessment.
+            </div>
+          )}
         </div>
       )}
 

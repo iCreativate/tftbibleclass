@@ -392,7 +392,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                               type="text"
                               value={arr[bi] ?? ""}
                               onChange={(e) => handleChangeBlank(q.id, bi, e.target.value)}
-                              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                               placeholder="Your answer..."
                             />
                           </div>
@@ -405,7 +405,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       type="text"
                       value={Array.isArray(answers[q.id]) ? (answers[q.id] as string[])[0] ?? "" : (answers[q.id] ?? "") as string}
                       onChange={(e) => handleChange(q.id, e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                       placeholder="Your answer..."
                     />
                   );
@@ -434,7 +434,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                             name={`match_answer_${q.id}_${si}`}
                             value={ansArr[si] ?? ""}
                             onChange={(e) => handleChangeMatch(q.id, si, parseInt(e.target.value, 10))}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                           >
                             <option value="">Choose...</option>
                             {opts.map((opt, j) => (
@@ -453,7 +453,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                     value={answers[q.id] ?? ""}
                     onChange={(e) => handleChange(q.id, e.target.value)}
                     rows={4}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                     placeholder="Your response (will be reviewed by instructor)..."
                   />
                 )}
@@ -466,7 +466,7 @@ export function TakeQuizClient({ courseId, quizId, userId, quiz, questions }: Pr
                       type="text"
                       value={answers[q.id] ?? ""}
                       onChange={(e) => handleChange(q.id, e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                       placeholder="Link or note..."
                     />
                   </>

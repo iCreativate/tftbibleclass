@@ -18,6 +18,7 @@ export type StudentQuizQuestion = {
 export type StudentQuizData = {
   quiz: {
     id: string;
+    module_id: string;
     title: string;
     description: string | null;
     passing_score: number;
@@ -69,6 +70,7 @@ export async function getQuizForStudent(
   return {
     quiz: {
       id: quiz.id,
+      module_id: quiz.module_id,
       title: quiz.title,
       description: quiz.description ?? null,
       passing_score: quiz.passing_score ?? 70,

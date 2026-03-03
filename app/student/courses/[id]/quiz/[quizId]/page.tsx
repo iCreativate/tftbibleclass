@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/server";
-import { getCourseForStudent } from "@/lib/courses";
+import { getCourseForStudent, canStudentTakeQuiz } from "@/lib/courses";
 import { getQuizForStudent } from "../actions";
 import { TakeQuizClient } from "./take-quiz-client";
 
@@ -18,6 +18,16 @@ export default async function StudentTakeQuizPage({ params }: Props) {
 
   const data = await getQuizForStudent(courseId, quizId, user.id);
   if (!data) notFound();
+
+  const isStaff = user.profile?.role === "admin" || user.profile?.role === "facilitator";
+  if (!isStaff) {
+    const { allowed, reason } = await canStudentTakeQuiz(user.id, data.quiz.module_id);
+    if (!allowed) {
+      redirect(
+        `/student/courses/${courseId}/lessons/${data.quiz.module_id}?message=quiz_locked&reason=${encodeURIComponent(reason ?? "Complete the lesson and resources first.")}`
+      );
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
