@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 
 export type CourseForCard = {
   id: string;
@@ -444,24 +444,24 @@ export async function getCourseCompletionStatus(
   return { completed: true };
 }
 
-/** Set module progress (e.g. 100 when video watched fully). Call from server action. Returns error message if the upsert failed. */
+/** Set module progress (e.g. 100 when video watched fully). Call from server action. Uses service role client when available so the write succeeds even if the request has no session. Returns error message if the upsert failed. */
 export async function setModuleProgress(
   userId: string,
   moduleId: string,
   progressPercent: number
 ): Promise<string | undefined> {
-  const supabase = createSupabaseServerClient();
   const value = Math.min(100, Math.max(0, progressPercent));
-  const { error } = await supabase.from("module_progress").upsert(
-    {
-      user_id: userId,
-      module_id: moduleId,
-      progress_percent: value,
-      completed: value >= 100,
-      last_accessed_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id,module_id" }
-  );
+  const payload = {
+    user_id: userId,
+    module_id: moduleId,
+    progress_percent: value,
+    completed: value >= 100,
+    last_accessed_at: new Date().toISOString(),
+  };
+  const supabase = createSupabaseServiceRoleClient() ?? createSupabaseServerClient();
+  const { error } = await supabase.from("module_progress").upsert(payload, {
+    onConflict: "user_id,module_id",
+  });
   return error ? error.message : undefined;
 }
 

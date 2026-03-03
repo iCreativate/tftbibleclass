@@ -29,6 +29,8 @@ export function MarkLessonCompleteButton({ courseId, moduleId }: Props) {
       }
       setSuccess(true);
       router.refresh();
+      // Force full navigation so the server re-fetches and sees updated progress
+      router.push(`/student/courses/${courseId}/lessons/${moduleId}`);
     } finally {
       setLoading(false);
     }

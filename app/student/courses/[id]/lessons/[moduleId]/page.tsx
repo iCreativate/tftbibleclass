@@ -8,6 +8,8 @@ import { MarkLessonCompleteButton } from "./mark-complete-button";
 import { MaterialDownloadLink } from "./material-download-link";
 import { Download, FileText, ArrowLeft, FileQuestion, Lock } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: Promise<{ id: string; moduleId: string }> | { id: string; moduleId: string };
   searchParams?: Promise<{ message?: string; reason?: string }> | { message?: string; reason?: string };
