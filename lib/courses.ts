@@ -497,7 +497,7 @@ export async function recordModuleMaterialsAccessed(
   }
 }
 
-/** Whether a student is allowed to take the quiz for this module: must have completed video (progress 100%) and accessed materials (if any). */
+/** Whether a student is allowed to take the quiz: unlocked when they click "I've watched this lesson" (progress 100%). Materials accessed is still tracked for UI ticks but does not block the quiz. */
 export async function canStudentTakeQuiz(
   userId: string,
   moduleId: string
@@ -516,21 +516,7 @@ export async function canStudentTakeQuiz(
   if (!videoComplete) {
     return {
       allowed: false,
-      reason: "Complete the lesson (watch the full video and mark it complete) before taking the assessment.",
-      videoComplete,
-      materialsAccessed,
-    };
-  }
-
-  const { count } = await supabase
-    .from("module_materials")
-    .select("id", { count: "exact", head: true })
-    .eq("module_id", moduleId);
-  const hasMaterials = (count ?? 0) > 0;
-  if (hasMaterials && !materialsAccessed) {
-    return {
-      allowed: false,
-      reason: "Download or open at least one lesson resource below before taking the assessment.",
+      reason: "Watch the full video and click “I've watched this lesson” to unlock the assessment.",
       videoComplete,
       materialsAccessed,
     };

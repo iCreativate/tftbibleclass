@@ -15,9 +15,11 @@ export function MarkLessonCompleteButton({ courseId, moduleId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   async function handleClick() {
     setError(null);
+    setSuccess(false);
     setLoading(true);
     try {
       const result = await markLessonComplete(courseId, moduleId);
@@ -25,6 +27,7 @@ export function MarkLessonCompleteButton({ courseId, moduleId }: Props) {
         setError(result.error);
         return;
       }
+      setSuccess(true);
       router.refresh();
     } finally {
       setLoading(false);
@@ -37,6 +40,12 @@ export function MarkLessonCompleteButton({ courseId, moduleId }: Props) {
         <p className="flex items-center gap-2 text-sm text-red-600" role="alert">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
+        </p>
+      )}
+      {success && (
+        <p className="flex items-center gap-2 text-sm text-emerald-700">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          Lesson marked complete. You can take the assessment below.
         </p>
       )}
       <Button
