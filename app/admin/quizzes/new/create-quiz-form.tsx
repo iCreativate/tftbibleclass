@@ -102,7 +102,7 @@ export function CreateQuizForm({
           id="quiz-type"
           value={quizType}
           onChange={(e) => setQuizType(e.target.value as AssessmentMode)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
         >
           {Object.entries(ASSESSMENT_MODE_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -120,7 +120,7 @@ export function CreateQuizForm({
           id="course"
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
         >
           <option value="">Select a course</option>
           {courses.map((c) => (
@@ -140,7 +140,7 @@ export function CreateQuizForm({
           value={moduleId}
           onChange={(e) => setModuleId(e.target.value)}
           disabled={!courseId || modules.length === 0}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 disabled:bg-slate-50 disabled:text-slate-500"
         >
           <option value="">
             {!courseId ? "Select a course first" : modules.length === 0 ? "No lessons in this course" : "Select a lesson"}
@@ -163,7 +163,7 @@ export function CreateQuizForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Week 1 Knowledge Check"
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
         />
       </div>
 
@@ -177,7 +177,7 @@ export function CreateQuizForm({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Brief description of the quiz"
           rows={2}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
         />
       </div>
 
@@ -193,7 +193,7 @@ export function CreateQuizForm({
             max={100}
             value={passingScore}
             onChange={(e) => setPassingScore(Number(e.target.value) || 70)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
           />
         </div>
         <div>
@@ -208,7 +208,7 @@ export function CreateQuizForm({
             value={timeLimitMinutes}
             onChange={(e) => setTimeLimitMinutes(e.target.value)}
             placeholder="No limit"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
           />
         </div>
       </div>

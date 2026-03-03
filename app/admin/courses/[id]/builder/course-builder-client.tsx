@@ -401,7 +401,7 @@ export function CourseBuilderClient({
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
                     placeholder="https://... (image URL)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                   />
                 </label>
                 <button
@@ -423,7 +423,7 @@ export function CourseBuilderClient({
                       value={videoUrlForThumbnail}
                       onChange={(e) => setVideoUrlForThumbnail(e.target.value)}
                       placeholder="https://youtube.com/... or https://vimeo.com/..."
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                     />
                   </label>
                   <button
@@ -481,7 +481,7 @@ export function CourseBuilderClient({
                 value={addTitle}
                 onChange={(e) => setAddTitle(e.target.value)}
                 placeholder="e.g. Week 1 – Introduction"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
               />
             </label>
             <label>
@@ -491,7 +491,7 @@ export function CourseBuilderClient({
                 value={addVideoUrl}
                 onChange={(e) => setAddVideoUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
               />
             </label>
           </div>
@@ -542,12 +542,12 @@ export function CourseBuilderClient({
                   value={lessonUploadTitle}
                   onChange={(e) => setLessonUploadTitle(e.target.value)}
                   placeholder="Display title"
-                  className="rounded border border-slate-200 px-2 py-1.5 text-sm w-32"
+                  className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 w-32"
                 />
                 <select
                   value={lessonUploadFormat}
                   onChange={(e) => setLessonUploadFormat(e.target.value as typeof lessonUploadFormat)}
-                  className="rounded border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                 >
                   {MATERIAL_FORMATS.map((f) => (
                     <option key={f} value={f}>{FORMAT_LABELS[f]}</option>
@@ -583,19 +583,19 @@ export function CourseBuilderClient({
                   value={newMatTitle}
                   onChange={(e) => setNewMatTitle(e.target.value)}
                   placeholder="Title"
-                  className="rounded border border-slate-200 px-2 py-1.5 text-sm w-32"
+                  className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 w-32"
                 />
                 <input
                   type="url"
                   value={newMatUrl}
                   onChange={(e) => setNewMatUrl(e.target.value)}
                   placeholder="https://..."
-                  className="rounded border border-slate-200 px-2 py-1.5 text-sm flex-1 min-w-[140px]"
+                  className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 flex-1 min-w-[140px]"
                 />
                 <select
                   value={newMatFormat}
                   onChange={(e) => setNewMatFormat(e.target.value as typeof newMatFormat)}
-                  className="rounded border border-slate-200 px-2 py-1.5 text-sm"
+                  className="rounded border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                 >
                   {MATERIAL_FORMATS.map((f) => (
                     <option key={f} value={f}>{FORMAT_LABELS[f]}</option>
