@@ -36,6 +36,7 @@ export function ModuleChat(props: ModuleChatProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [sendingNoteId, setSendingNoteId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const courseId = props.courseId ?? null;
   const moduleId =
@@ -62,7 +63,13 @@ export function ModuleChat(props: ModuleChatProps) {
     let cancelled = false;
     setLoading(true);
     getMyNotesWithMessages(courseId, moduleId).then((data) => {
-      if (!cancelled) setThreads(data);
+      if (cancelled) return;
+      const sorted = [...data].sort((a, b) => {
+        const aLast = a.messages[a.messages.length - 1]?.created_at ?? a.created_at;
+        const bLast = b.messages[b.messages.length - 1]?.created_at ?? b.created_at;
+        return new Date(bLast).getTime() - new Date(aLast).getTime();
+      });
+      setThreads(sorted);
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
@@ -75,18 +82,26 @@ export function ModuleChat(props: ModuleChatProps) {
     if (!trimmed || sending || !hasCourses) return;
     const topicCourseId = selectedCourseId || null;
     if (!topicCourseId) return;
+    setError(null);
     setSending(true);
     try {
-      const { error } = await submitQuestion(
+      const result = await submitQuestion(
         trimmed,
         topicCourseId,
         selectedModuleId || null
       );
-      if (!error) {
-        setNewQuestion("");
-        const data = await getMyNotesWithMessages(courseId, moduleId);
-        setThreads(data);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setNewQuestion("");
+      const data = await getMyNotesWithMessages(courseId, moduleId);
+      const sorted = [...data].sort((a, b) => {
+        const aLast = a.messages[a.messages.length - 1]?.created_at ?? a.created_at;
+        const bLast = b.messages[b.messages.length - 1]?.created_at ?? b.created_at;
+        return new Date(bLast).getTime() - new Date(aLast).getTime();
+      });
+      setThreads(sorted);
     } finally {
       setSending(false);
     }
@@ -95,14 +110,22 @@ export function ModuleChat(props: ModuleChatProps) {
   async function handleReply(noteId: string) {
     const body = replyByNoteId[noteId]?.trim();
     if (!body || sendingNoteId) return;
+    setError(null);
     setSendingNoteId(noteId);
     try {
-      const { error } = await addStudentReply(noteId, body);
-      if (!error) {
-        setReplyByNoteId((prev) => ({ ...prev, [noteId]: "" }));
-        const data = await getMyNotesWithMessages(courseId, moduleId);
-        setThreads(data);
+      const result = await addStudentReply(noteId, body);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setReplyByNoteId((prev) => ({ ...prev, [noteId]: "" }));
+      const data = await getMyNotesWithMessages(courseId, moduleId);
+      const sorted = [...data].sort((a, b) => {
+        const aLast = a.messages[a.messages.length - 1]?.created_at ?? a.created_at;
+        const bLast = b.messages[b.messages.length - 1]?.created_at ?? b.created_at;
+        return new Date(bLast).getTime() - new Date(aLast).getTime();
+      });
+      setThreads(sorted);
     } finally {
       setSendingNoteId(null);
     }
@@ -122,15 +145,19 @@ export function ModuleChat(props: ModuleChatProps) {
         </div>
       </div>
 
-      {/* Message history with topic per thread */}
-      <div className="space-y-1">
-        <p className="text-xs font-medium text-slate-600">Message history</p>
-        <div className="max-h-64 space-y-4 overflow-y-auto rounded-lg border border-slate-200/80 bg-white/90 px-3 py-2 text-xs text-slate-800">
+      {/* Chat history: all threads with topic and messages */}
+      <div className="space-y-2">
+        <h2 className="text-sm font-semibold text-slate-800">Chat history</h2>
+        {error && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            {error}
+          </p>
+        )}
+        <div className="max-h-80 space-y-4 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800">
           {loading && <p className="text-slate-500">Loading...</p>}
           {!loading && threads.length === 0 && (
             <p className="text-slate-500">
-              No questions yet. Choose a course and module below to ask something about{" "}
-              {props.courseTitle}.
+              No messages yet. Choose a course (and optional module) below and type your question to start a conversation.
             </p>
           )}
           {!loading &&
@@ -150,6 +177,9 @@ export function ModuleChat(props: ModuleChatProps) {
                   <div key={msg.id} className="flex flex-col gap-0.5">
                     <span className="text-[10px] font-semibold text-slate-500">
                       {msg.role === "student" ? "You" : "Facilitator"}
+                      <span className="ml-2 font-normal text-slate-400">
+                        {new Date(msg.created_at).toLocaleString()}
+                      </span>
                     </span>
                     <p className="rounded-lg bg-slate-50 px-2 py-1 text-slate-800">
                       {msg.body}

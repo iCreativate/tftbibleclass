@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
 
@@ -112,6 +113,7 @@ export async function respondToNote(noteId: string, adminResponse: string): Prom
     })
     .eq("id", noteId);
   if (error) return { error: error.message };
+  revalidatePath("/admin/messages");
   return {};
 }
 
@@ -128,5 +130,6 @@ export async function addFacilitatorReply(noteId: string, body: string): Promise
     body: trimmed,
   });
   if (error) return { error: error.message };
+  revalidatePath("/admin/messages");
   return {};
 }

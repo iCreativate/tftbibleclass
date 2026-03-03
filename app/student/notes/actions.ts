@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/server";
 
@@ -121,6 +122,7 @@ export async function addStudentReply(noteId: string, body: string): Promise<{ e
     body: trimmed,
   });
   if (error) return { error: error.message };
+  revalidatePath("/student/notes");
   return {};
 }
 
@@ -142,5 +144,6 @@ export async function submitQuestion(
     content: trimmed,
   });
   if (error) return { error: error.message };
+  revalidatePath("/student/notes");
   return {};
 }

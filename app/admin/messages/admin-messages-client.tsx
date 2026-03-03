@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   respondToNote,
@@ -19,22 +19,30 @@ export function AdminMessagesClient({
   const [respondingId, setRespondingId] = useState<string | null>(null);
   const [responseText, setResponseText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNotes(initialNotes);
+  }, [initialNotes]);
 
   async function handleSendReply(noteId: string) {
     const trimmed = responseText.trim();
     if (!trimmed || saving) return;
+    setError(null);
     setSaving(true);
     try {
       const note = notes.find((n) => n.id === noteId);
       const isFirstResponse = !note?.admin_response;
-      const { error } = isFirstResponse
+      const { error: err } = isFirstResponse
         ? await respondToNote(noteId, trimmed)
         : await addFacilitatorReply(noteId, trimmed);
-      if (!error) {
-        setRespondingId(null);
-        setResponseText("");
-        router.refresh();
+      if (err) {
+        setError(err);
+        return;
       }
+      setRespondingId(null);
+      setResponseText("");
+      router.refresh();
     } finally {
       setSaving(false);
     }
@@ -50,6 +58,11 @@ export function AdminMessagesClient({
 
   return (
     <div className="space-y-4">
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
       {notes.map((note) => (
         <div
           key={note.id}
