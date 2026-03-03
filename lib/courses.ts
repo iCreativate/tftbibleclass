@@ -444,15 +444,15 @@ export async function getCourseCompletionStatus(
   return { completed: true };
 }
 
-/** Set module progress (e.g. 100 when video watched fully). Call from server action. */
+/** Set module progress (e.g. 100 when video watched fully). Call from server action. Returns error message if the upsert failed. */
 export async function setModuleProgress(
   userId: string,
   moduleId: string,
   progressPercent: number
-): Promise<void> {
+): Promise<string | undefined> {
   const supabase = createSupabaseServerClient();
   const value = Math.min(100, Math.max(0, progressPercent));
-  await supabase.from("module_progress").upsert(
+  const { error } = await supabase.from("module_progress").upsert(
     {
       user_id: userId,
       module_id: moduleId,
@@ -462,6 +462,7 @@ export async function setModuleProgress(
     },
     { onConflict: "user_id,module_id" }
   );
+  return error ? error.message : undefined;
 }
 
 /** Record that the student has accessed (e.g. downloaded) learner materials for this module. Call when they open a material link. */
